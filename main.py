@@ -52,10 +52,9 @@ def sendBeaconFrame(ssid, mac, iface, count, interval):
     packet = RadioTap() / dot11 / beacon / essid
     sendp(packet, iface=iface, count=count, inter=interval, verbose=False)
 def sendBeaconFrameHandler(essid_mac, interface, delay, count):
-    for essid, mac in essid_mac.items():
-        sendBeaconFrame(essid, mac, interface, count, delay)
-        if not running:
-            break
+    while running:
+        for essid, mac in essid_mac.items():
+            sendBeaconFrame(essid, mac, interface, count, delay)
 
 if __name__ == "__main__":
     arguments = get_arguments(('-i', "--interface", "interface", "Network Interface to Start Sniffing on"),
