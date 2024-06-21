@@ -27,6 +27,7 @@ mac_elements = "0123456789abcdef"
 broadcast_mac = "ff:ff:ff:ff:ff:ff"
 send_interval_delay = 0.1
 beacon_frame_set_count = 10
+essid_length = 25
 
 def display(status, data, start='', end='\n'):
     print(f"{start}{status_color[status]}[{status}] {Fore.BLUE}[{date.today()} {strftime('%H:%M:%S', localtime())}] {status_color[status]}{Style.BRIGHT}{data}{Fore.RESET}{Style.RESET_ALL}", end=end)
@@ -58,6 +59,8 @@ def sendBeaconFrameHandler(essid_mac, interface, delay, count):
 
 if __name__ == "__main__":
     arguments = get_arguments(('-i', "--interface", "interface", "Network Interface to Start Sniffing on"),
+                              ('-r', "--random", "random", "Automatically Generate Random ESSIDs and MAC Addresses for Entered Amount"),
+                              ('-l', "--length", "length", f"Length of SSIDs for Automatic Generation (Default={essid_length})"),
                               ('-e', "--essid", "essid", "ESSID for the Beacon Frame (Seperated by '~' and mac seperated by ',' (essid_0,mac_0~essid_1,mac_1) or File containing List of ESSIDs and MAC Addresses (essid,mac) (MAC Address is Optional))"),
                               ('-m', "--mac", "mac", "MAC Addresses for ESSIDs (Seperated by ',' or File Containing List of MAC Addresses, Default=Random)"),
                               ('-c', "--count", "count", f"Count of Beacon frame to send in each set (Default={beacon_frame_set_count})"),
@@ -95,6 +98,12 @@ if __name__ == "__main__":
             if mac == '':
                 arguments.essid[essid] = arguments.mac[current_mac_index%total_macs]
                 current_mac_index += 1
+    if arguments.random:
+        if arguments.length:
+            arguments.length = int(arguments.length)
+        else:
+            arguments.length = essid_length
+        arguments.essid = {generateRandomString(arguments.length): generateRandomMAC() for _ in range(int(arguments.random))}
     for essid, mac in arguments.essid.items():
         if mac == '':
             arguments.essid[essid] = generateRandomMAC()
